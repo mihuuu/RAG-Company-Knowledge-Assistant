@@ -18,11 +18,11 @@ pytesseract
 pymupdf
 
 #Langchain
-langchain~=0.2
+langchain
 langchain-postgres
 
 #Caching
-redis~=5.0
+redis
 langchain-redis
 
 #Re-Ranking

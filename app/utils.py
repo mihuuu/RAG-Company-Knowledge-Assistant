@@ -13,6 +13,6 @@ async def get_vector_store() -> AsyncPGVectorStore:
     return await AsyncPGVectorStore.create(
         engine=PG_ENGINE,
         embedding_service=embeddings,
-        table_name="langchain_pg_embeddings",
+        table_name="langchain_pg_embedding",
     )
 
