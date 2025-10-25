@@ -12,7 +12,7 @@ from langchain_postgres.v2.indexes import HNSWIndex, DistanceStrategy
 
 DATA_DIR = os.getenv("DATA_DIR", "data")
 
-def _load_docs(base: str = DATA_DIR) -> List[Document]:
+def load_docs(base: str = DATA_DIR) -> List[Document]:
     docs: List[Document] = []
 
     # recurse through all files under base
@@ -21,7 +21,20 @@ def _load_docs(base: str = DATA_DIR) -> List[Document]:
             continue
         ext = os.path.splitext(path)[1].lower()
         try:
-            pass
+            if ext == ".md":
+                loader = UnstructuredMarkdownLoader(path)
+                docs.extend(loader.load())
+            elif ext  == ".pdf":
+                loader = PyMuPDFLoader(path)
+                docs.extend(loader.load())
+            elif ext in [".docx", ".doc"]:
+                loader = UnstructuredWordDocumentLoader(path)
+                docs.extend(loader.load())
+            elif ext in [".txt"]:
+                loader = TextLoader(path, encoding="utf8")
+                docs.extend(loader.load())
+            else:
+                print(f"INGEST WARNING: unsupported file type {path}")
         except Exception:
             print(f"INGEST ERROR: failed to load {path}")
             traceback.print_exc()
@@ -29,16 +42,25 @@ def _load_docs(base: str = DATA_DIR) -> List[Document]:
     return docs
         
 
-def _chunk(docs: List[Document]) -> List[Document]:
+def split_chunks(docs: List[Document]) -> List[Document]:
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=900,
+        chunk_overlap=120
+    )
     try:
-        pass
+        return splitter.split_documents(docs)
     except Exception:
         print(f"INGEST ERROR: chunking failed")
         traceback.print_exc()
         raise
 
 
-
 async def run_ingest_async() -> dict:
-   pass
+   docs = load_docs()
+   chunks = split_chunks(docs)
+   store = await get_vector_store()
+   await store.aadd_documents(chunks)
+   print(f"INGEST: {len(docs)} docs, {len(chunks)} chunks")
+   return {"documents": len(docs), "chunks": len(chunks)}
+
 
