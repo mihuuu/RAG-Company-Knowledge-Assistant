@@ -4,7 +4,7 @@ import os
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain.chains import create_retrieval_chain
+from langchain.chains.retrieval import create_retrieval_chain
 from langchain.docstore.document import Document
 
 from langchain.globals import set_llm_cache
@@ -14,8 +14,6 @@ from .utils import get_vector_store
 
 from langchain_cohere import CohereRerank
 from langchain.retrievers import ContextualCompressionRetriever
-
-
 
 
 SYSTEM = """You are a grounded company knowledge assistant.
@@ -32,8 +30,23 @@ PROMPT = ChatPromptTemplate.from_messages([
      "Rule: Prefer the most recent policy by effective date.")
 ])
 
-async def _build_chain():
-    pass
+async def build_chain():
+    store = await get_vector_store()
+    retriever = store.as_retriever(search_kwargs={"k": int(os.getenv("RETRIEVAL_K", "5"))})
+    llm = ChatOpenAI(model="gpt-4o-mini")
+    doc_chain = create_stuff_documents_chain(llm, PROMPT)
+    rag_chain = create_retrieval_chain(retriever, doc_chain)
+    return rag_chain
+
 
 async def answer_with_docs_async(question: str) -> Tuple[str, List[str]]:
-    pass
+    chain = await build_chain()
+    result = await chain.ainvoke({"input": question})
+
+    sources = []
+    docs: List[Document] = result["context"]
+    unique_sources = { d.metadata.get("source", "unknown") for d in docs }
+    sources = sorted(unique_sources)
+
+    return result["answer"], sources
+
