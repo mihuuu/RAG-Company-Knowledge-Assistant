@@ -9,6 +9,7 @@ from langchain_community.document_loaders import UnstructuredMarkdownLoader, PyM
 
 from .utils import get_vector_store
 from langchain_postgres.v2.indexes import HNSWIndex, DistanceStrategy
+from langchain_postgres.v2.async_vectorstore import AsyncPGVectorStore
 
 DATA_DIR = os.getenv("DATA_DIR", "data")
 
@@ -54,6 +55,16 @@ def split_chunks(docs: List[Document]) -> List[Document]:
         traceback.print_exc()
         raise
 
+async def create_index(store: AsyncPGVectorStore):
+    index = HNSWIndex(
+        name="hnsw_idx",
+        distance_strategy=DistanceStrategy.COSINE_DISTANCE,
+        m=16,
+        ef_construction=64
+    )
+    await store.aapply_vector_index(index, concurrently=True)
+    print("Index created successfully")
+
 
 async def run_ingest_async() -> dict:
    docs = load_docs()
@@ -61,6 +72,9 @@ async def run_ingest_async() -> dict:
    store = await get_vector_store()
    await store.aadd_documents(chunks)
    print(f"INGEST: {len(docs)} docs, {len(chunks)} chunks")
+
+   await create_index(store)
+
    return {"documents": len(docs), "chunks": len(chunks)}
 
 
