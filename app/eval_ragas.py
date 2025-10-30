@@ -13,7 +13,7 @@ oai_llm = ChatOpenAI(model="gpt-4o-mini")
 
 def load_jsonl(path):
     with open(path, "r", encoding="utf-8") as f:
-        return [json.loads(line) for line in f if line.strip()]
+        return json.load(f)
 
 def print_eval_res(eval_result):
     scores = eval_result.scores
@@ -34,7 +34,7 @@ def print_eval_res(eval_result):
 
 async def evaluate_rag_system(test_path="../seed/qna_test.json"):
     test_data = load_jsonl(test_path)
-    results = []
+    list = []
 
     for item in test_data:
         question = item["question"]
@@ -44,8 +44,19 @@ async def evaluate_rag_system(test_path="../seed/qna_test.json"):
         res = requests.post(url, json = myobj).json()
         answer, contexts = res['answer'], res['contexts']
 
-        #TODO
-       
+        list.append({
+            "user_input": question,
+            "response": answer,
+            "retrieved_contexts": contexts,
+            "reference": reference_answer
+        })
+
+    ds = EvaluationDataset.from_list(list)
+    metrics = [faithfulness, answer_relevancy, context_precision, context_recall]
+    run_config = RunConfig(max_workers=16, timeout=30)
+    eval_result = evaluate(dataset=ds, metrics=metrics, llm=oai_llm, run_config=run_config)
+    print("Ragas Evaluation Results")
+    print_eval_res(eval_result)
         
 
 if __name__ == "__main__":

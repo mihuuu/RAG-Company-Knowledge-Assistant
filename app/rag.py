@@ -47,14 +47,15 @@ async def build_chain():
     return rag_chain
 
 
-async def answer_with_docs_async(question: str) -> Tuple[str, List[str]]:
+async def answer_with_docs_async(question: str) -> Tuple[str, List[str], List[str]]:
     chain = await build_chain()
     result = await chain.ainvoke({"input": question})
 
-    sources = []
     docs: List[Document] = result["context"]
     unique_sources = { d.metadata.get("source", "unknown") for d in docs }
     sources = sorted(unique_sources)
 
-    return result["answer"], sources
+    contexts = [d.page_content for d in docs]
+
+    return result["answer"], sources, contexts
 
