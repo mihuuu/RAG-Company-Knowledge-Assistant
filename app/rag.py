@@ -61,7 +61,7 @@ async def build_chain(category: str | None = None):
     return rag_chain
 
 
-async def answer_with_docs_async(question: str, category: str | None) -> Tuple[str, List[str], List[str]]:
+async def answer_with_docs_async(question: str, category: str | None = None) -> Tuple[str, List[str], List[str]]:
     chain = await build_chain(category)
     result = await chain.ainvoke({"input": question})
 
