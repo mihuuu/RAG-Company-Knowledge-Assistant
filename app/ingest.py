@@ -21,21 +21,32 @@ def load_docs(base: str = DATA_DIR) -> List[Document]:
         if os.path.isdir(path) or os.path.basename(path).startswith("."):
             continue
         ext = os.path.splitext(path)[1].lower()
+
+        relative_path = os.path.relpath(path, base)
+        category = relative_path.split(os.sep)[0] if os.sep in relative_path else "general"
+
         try:
+            cur_docs = []
             if ext == ".md":
                 loader = UnstructuredMarkdownLoader(path)
-                docs.extend(loader.load())
+                cur_docs.extend(loader.load())
             elif ext  == ".pdf":
                 loader = PyMuPDFLoader(path)
-                docs.extend(loader.load())
+                cur_docs.extend(loader.load())
             elif ext in [".docx", ".doc"]:
                 loader = UnstructuredWordDocumentLoader(path)
-                docs.extend(loader.load())
+                cur_docs.extend(loader.load())
             elif ext in [".txt"]:
                 loader = TextLoader(path, encoding="utf8")
-                docs.extend(loader.load())
+                cur_docs.extend(loader.load())
             else:
                 print(f"INGEST WARNING: unsupported file type {path}")
+            
+            # Add metadata
+            for d in cur_docs:
+                d.metadata["category"] = category
+                docs.append(d)
+
         except Exception:
             print(f"INGEST ERROR: failed to load {path}")
             traceback.print_exc()

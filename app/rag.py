@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Any
 import os
 
 from langchain_core.prompts import ChatPromptTemplate
@@ -38,10 +38,13 @@ set_llm_cache(
     )
 )
 
-async def build_chain():
+async def build_chain(category: str | None = None):
     store = await get_vector_store()
-    base_retriever = store.as_retriever(search_kwargs={"k": int(os.getenv("RETRIEVAL_K", "5"))})
+    search_kwargs: Dict[str, Any] = {"k": int(os.getenv("RETRIEVAL_K", "5"))}
+    if category:
+        search_kwargs["filter"] = {"category": category}
 
+    base_retriever = store.as_retriever(search_kwargs=search_kwargs)
     # cohere rerank
     compressor = CohereRerank(
         top_n=3,
@@ -58,8 +61,8 @@ async def build_chain():
     return rag_chain
 
 
-async def answer_with_docs_async(question: str) -> Tuple[str, List[str], List[str]]:
-    chain = await build_chain()
+async def answer_with_docs_async(question: str, category: str | None) -> Tuple[str, List[str], List[str]]:
+    chain = await build_chain(category)
     result = await chain.ainvoke({"input": question})
 
     docs: List[Document] = result["context"]
