@@ -10,7 +10,7 @@ from langchain.docstore.document import Document
 from langchain.globals import set_llm_cache
 from langchain_redis import RedisSemanticCache
 
-from .utils import get_vector_store
+from .utils import get_vector_store, embeddings
 
 from langchain_cohere import CohereRerank
 from langchain.retrievers import ContextualCompressionRetriever
@@ -29,6 +29,14 @@ PROMPT = ChatPromptTemplate.from_messages([
      "Context:\n{context}\n\n"
      "Rule: Prefer the most recent policy by effective date.")
 ])
+
+set_llm_cache(
+    RedisSemanticCache(
+        redis_url=os.getenv("REDIS_URL", "redis://localhost:6379"),
+        embeddings=embeddings,
+        distance_threshold=0.98
+    )
+)
 
 async def build_chain():
     store = await get_vector_store()
