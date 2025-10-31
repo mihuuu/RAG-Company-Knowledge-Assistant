@@ -45,15 +45,21 @@ async def build_chain(category: str | None = None):
         search_kwargs["filter"] = {"category": category}
 
     base_retriever = store.as_retriever(search_kwargs=search_kwargs)
-    # cohere rerank
-    compressor = CohereRerank(
-        top_n=3,
-        model="rerank-multilingual-v3.0",
-    )
-    retriever = ContextualCompressionRetriever(
-        base_retriever=base_retriever,
-        base_compressor=compressor
-    )
+    
+    # cohere rerank (optional)
+    cohere_api_key = os.getenv("CO_API_KEY") or os.getenv("COHERE_API_KEY")
+    if cohere_api_key:
+        compressor = CohereRerank(
+            top_n=3,
+            model="rerank-multilingual-v3.0",
+        )
+        retriever = ContextualCompressionRetriever(
+            base_retriever=base_retriever,
+            base_compressor=compressor
+        )
+    else:
+        # Skip reranking if API key is not provided
+        retriever = base_retriever
 
     llm = ChatOpenAI(model="gpt-4o-mini")
     doc_chain = create_stuff_documents_chain(llm, PROMPT)
