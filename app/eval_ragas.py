@@ -32,7 +32,7 @@ def print_eval_res(eval_result):
     for k, v in means.items():
         print(f"- {k}: {v:.3f}")
 
-async def evaluate_rag_system(test_path="../seed/qna_test.json"):
+async def evaluate_rag_system(test_path="seed/qna_test.json"):
     test_data = load_jsonl(test_path)
     list = []
 
