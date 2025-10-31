@@ -1,6 +1,6 @@
 # 🧠 Company Knowledge Assistant
 
-A **Retrieval-Augmented Generation (RAG)** system that enables intelligent Q&A over company documents. Built with modern AI/ML stack to provide accurate, source-grounded answers from your knowledge base.
+A **Retrieval-Augmented Generation (RAG)** system that enables intelligent Q&A over company documents. Built with modern AI stack to provide accurate, source-grounded answers from your knowledge base.
 
 ## ✨ Features
 
@@ -141,7 +141,7 @@ Metrics evaluated:
 - `POST /ask` - Ask a question
   ```json
   {
-    "question": "What is the expense policy?"
+    "question": "How many PTO days are full-time employees entitled to in a calendar year?"
   }
   ```
 
