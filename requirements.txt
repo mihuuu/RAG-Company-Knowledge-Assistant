@@ -1,0 +1,33 @@
+# Core
+fastapi
+uvicorn
+python-dotenv
+pandas
+tiktoken
+
+# DB / pool
+psycopg[binary,pool]
+
+# Ingestion helpers
+unstructured
+unstructured[pdf]
+unstructured[docx]
+unstructured[image]
+markdown
+pytesseract
+pymupdf
+
+#Langchain
+langchain
+langchain-postgres
+
+#Caching
+redis
+langchain-redis
+
+#Re-Ranking
+cohere
+langchain-cohere
+
+#Evals
+ragas
