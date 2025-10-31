@@ -10,7 +10,7 @@ A **Retrieval-Augmented Generation (RAG)** system that enables intelligent Q&A o
 - 💾 **Semantic Caching**: Redis-based caching to reduce API calls for similar questions
 - 🌐 **Web Interface**: Clean, interactive UI for asking questions
 - 📊 **RAG Evaluation**: Built-in Ragas metrics for system assessment
-- 🗂️ **Category Organization**: Documents organized by type (announcements, FAQs, guides, handbooks, policies)
+- 🗂️ **Category Organization**: Documents organized by type (FAQs, guides, policies, etc.)
 
 ## 🛠️ Tech Stack
 
@@ -34,7 +34,7 @@ A **Retrieval-Augmented Generation (RAG)** system that enables intelligent Q&A o
 
 2. **Chunk Documents**
 
-   - RecursiveCharacterTextSplitter
+   - Splits documents into chunks with `RecursiveCharacterTextSplitter`
    - Preserves metadata (category, source)
 
 3. **Embed & Store**
@@ -118,6 +118,26 @@ A **Retrieval-Augmented Generation (RAG)** system that enables intelligent Q&A o
    - Place documents in `data/` directory (organized by category)
    - Click "Ingest Data" in the web UI, or POST to `/ingest`
 
+### Cleanup
+
+To stop services and remove volumes:
+
+```bash
+docker compose down -v
+```
+
+## 🔧 API Endpoints
+
+- `GET /` - Web UI
+- `POST /ingest` - Trigger document ingestion
+- `GET /ingest/status` - Check ingestion status
+- `POST /ask` - Ask a question
+  ```json
+  {
+    "question": "How many PTO days are full-time employees entitled to in a calendar year?"
+  }
+  ```
+
 ## 🧪 Evaluation
 
 Run RAG evaluation using Ragas metrics:
@@ -132,26 +152,6 @@ Metrics evaluated:
 - **Answer Relevancy**: Relevance of answer to question
 - **Context Precision**: Precision of retrieved contexts
 - **Context Recall**: Recall of relevant information
-
-## 🔧 API Endpoints
-
-- `GET /` - Web UI
-- `POST /ingest` - Trigger document ingestion
-- `GET /ingest/status` - Check ingestion status
-- `POST /ask` - Ask a question
-  ```json
-  {
-    "question": "How many PTO days are full-time employees entitled to in a calendar year?"
-  }
-  ```
-
-## 🧹 Cleanup
-
-To stop services and remove volumes:
-
-```bash
-docker compose down -v
-```
 
 ## 📝 License
 
